@@ -1,8 +1,10 @@
-from turtle import Turtle, Screen
+from turtle import Screen
+from snake import Snake
+from food import Food
+from scoreboard import ScoreBoard
 import time
 
 # Variables
-snake = []
 game_is_on = True
 
 # Screen Setup
@@ -12,29 +14,39 @@ screen.tracer(0)
 screen.bgcolor("black")
 screen.title("My Snake Game")
 
-# Body snake
-for index in range(3):
-    snake.append(Turtle("square"))
-    snake[index].penup()
-    snake[index].color("white")
+# Create a snake
+snake = Snake()
+food = Food()
+scoreboard = ScoreBoard()
 
-for index in range(1, len(snake)):
-    snake[index].setx(snake[index - 1].xcor() - 20)
+# Screen listen
+screen.listen()
+screen.onkey(snake.up, "Up")
+screen.onkey(snake.down, "Down")
+screen.onkey(snake.left, "Left")
+screen.onkey(snake.right, "Right")
 
 while game_is_on:
     screen.update()
     time.sleep(0.1)
+    snake.move()
 
-    for index in range(len(snake) -1, 0, -1):
-        print(index)
-        print(snake[index].position())
-        new_x = snake[index - 1].xcor()
-        new_y = snake[index - 1].ycor()
-        snake[index].goto(new_x, new_y)
-    snake[0].forward(20)
+    # Detect Collision with food.
+    if snake.head.distance(food) < 15:
+        food.refresh()
+        snake.extend()
+        scoreboard.increase_scoreboard()
 
+    # Detect Collision with wall
+    if snake.head.xcor() > 280 or snake.head.xcor() < -280 or snake.head.ycor() > 280 or snake.head.ycor() < -280:
+        game_is_on = False
+        scoreboard.game_over()
 
-
+    # Detect collision with tail
+    for segment in snake.segments[1:]:
+        if snake.head.distance(segment) < 10:
+            game_is_on = False
+            scoreboard.game_over()
 # Body snake
 # for _ in range(2):
 #     new_snake = Turtle()
@@ -69,15 +81,6 @@ while game_is_on:
 # snake_01.setx(0)
 # snake_02.setx(-20)
 # snake_03.setx(-40)
+# Screen
 
-
-
-
-
-
-
-
-
-
-# Screnn
 screen.exitonclick()
